@@ -1,0 +1,7 @@
+{
+  "user_agent": "CrystalScript:ThreadfollowerBot:v0.0.2 (by /u/yourusernamehere)",
+  "client_id":  "the client id given by reddit (see api docs)",
+  "secret":     "the secret",
+  "username":   "your bot's username",
+  "password":   "your bot's password"
+}
