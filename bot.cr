@@ -60,10 +60,27 @@ abstract class RedditThing
     end
   end
   
+  module BoolOrTimeStampConverter
+    def self.from_json(pull)
+      case pull.type
+      when :float, :int
+        return TimeStampConverter.from_json(pull)
+      when :bool
+        return pull.read_bool
+      else
+        raise "expected float, int, or bool but type was #{pull.type}"
+      end
+    end
+  end
+  
   TYPE_MAPPING = {
     "Listing" => Listing,
     "t1" => Comment,
-    "t3" => Post,
+    #"t2" => Link
+    "t3" => Link,
+    "t4" => Message,
+    "t5" => Subreddit,
+    "t6" => Award,
     "more" => MoreReddit
   }
   def self.from_json(pull : JSON::PullParser)
@@ -97,6 +114,71 @@ class MoreReddit < RedditThing
     parent_id: String,
     depth: Int64,
     children: Array(String)#{type: Array(RedditThing), converter: RedditThing::ArrayConverter}
+  )
+end
+
+#votable
+# ups: Int64,
+# downs: In64, #(always zero)
+# likes: Bool?,
+
+#created
+# created: Float64,
+# created_utc: {type: Time, converter: RedditThing::TimeStampConverter}
+
+class Link < RedditThing
+  JSON.mapping(
+    ups: Int64,
+    downs: In64, #(always zero)
+    likes: Bool?,
+    
+    created_utc: {type: Time, converter: RedditThing::TimeStampConverter},
+
+    author: String,
+    author_flair_css_class: String,
+    author_flair_text: String,
+    clicked: Bool, #From reddit docs: "probably always returns false"
+    domain: String,
+    hidden: Bool,
+    is_self: Bool,
+    link_flair_css_class: String,
+    link_flair_text: String,
+    locked: Bool,
+    #media: TODO
+    #media_embed: TODO
+    num_comments: Int64,
+    over_18: Bool,
+    permalink: String,
+    saved: Bool,
+    #score
+    selftext: String,
+    selftext_html: String?,
+    subreddit: String,
+    subreddit_id: String,
+    thumbnail: String,
+    title: String,
+    url: String,
+    edited: {type: Bool | Time, converter: RedditThing::BoolOrTimeStampConverter}
+  )
+end
+
+class Message < RedditThing
+  JSON.mapping(
+    id: String,
+    name: String,
+    
+  )
+end
+
+class Subreddit < RedditThing
+  JSON.mapping(
+    #todo
+  )
+end
+
+class Award < RedditThing
+  JSON.mapping(
+    #todo
   )
 end
 
