@@ -76,7 +76,7 @@ abstract class RedditThing
   TYPE_MAPPING = {
     "Listing" => Listing,
     "t1" => Comment,
-    #"t2" => Link
+    "t2" => Account,
     "t3" => Link,
     "t4" => Message,
     "t5" => Subreddit,
@@ -102,7 +102,10 @@ abstract class RedditThing
     end
     return res.not_nil!
   end
-  
+
+  def fullname
+    name
+  end
   #abstract def initialize(pull : JSON::PullParser)
 end
 
@@ -111,7 +114,7 @@ class MoreReddit < RedditThing
     count: Int64,
     name: String,
     id: String,
-    parent_id: String,
+    parent_id: String, #not documented in reddit's api, still needed sometimes
     depth: Int64,
     children: Array(String)#{type: Array(RedditThing), converter: RedditThing::ArrayConverter}
   )
@@ -160,20 +163,62 @@ class Link < RedditThing
     url: String,
     edited: {type: Bool | Time, converter: RedditThing::BoolOrTimeStampConverter}
   )
+
+  def over18
+    over_18
+  end
 end
 
 class Message < RedditThing
   JSON.mapping(
-    id: String,
-    name: String,
+    created_utc: {type: Time, converter: RedditThing::TimeStampConverter},
     
+    author: String,
+    body: String,
+    body_html: String,
+    context: String,
+    first_message: String,
+    first_message_name: String,
+    likes: Bool?
+    link_title: String?,
+    name: String,
+    new: Bool,
+    parent_id: String?,
+    #replies:
+    subject: String,
+    subreddit: String?,
+    was_comment: Bool
   )
 end
 
 class Subreddit < RedditThing
   JSON.mapping(
-    #todo
+    accounts_active: Int64,
+    comment_score_hide_mins: Int64,
+    description: String,
+    description_html: String,
+    display_name: String,
+    header_img: String?,
+    header_size: Array(Int64), #todo: make this a tuple, possibly named
+    over18: Bool,
+    public_description: String,
+    public_traffic: Bool,
+    subscribers: Int64,
+    submission_type: String, # according to reddit this should be: one of "any", "link" or "self"
+    submit_link_label: String,
+    submit_text_label: String,
+    subreddit_type: String,
+    title: String,
+    url: String,
+    user_is_banned: Bool,
+    user_is_contributor: Bool,
+    user_is_moderator: Bool,
+    user_is_subscriber: Bool
   )
+
+  def over_18
+    over18
+  end
 end
 
 class Award < RedditThing
@@ -226,51 +271,83 @@ class DefunctListing < RedditThing
   #  delegate :[], :[]=, size, each, to: @children
 end
 
+class Account < RedditThing
+  JSON.mapping(
+    id: String,
+
+    comment_karma: Int64,
+    has_mail: Bool?,
+    has_mod_mail: Bool?,
+    has_verified_email: Bool,
+    inbox_count: Int64?,
+    is_friend: Bool,
+    is_gold: Bool,
+    is_mod: Bool,
+    link_karma: Int64,
+    modhash: String?,
+    name: String,
+    over_18: Bool
+  )
+
+  def fullname
+    return "t2_" + self.id
+  end
+end
+
 class Comment < RedditThing
   JSON.mapping(
-    subreddit_id: String,
-    #approved_at_utc: Int64?,
-    #banned_by:
-    #removal_reason:
-    link_id: String,
-    likes: Bool?,
-    replies: {type: Listing, converter: RedditThing::RepliesConverter},
-    #user_reports:
-    saved: Bool,
     id: String,
-    #banned_at_utc:
-    gilded: Int64,
-    archived: Bool,
-    #report_reasons:
-    author: String,
-    can_mod_post: Bool,
-    ups: Int64,
-    parent_id: String,
-    score: Int64,
-    #approved_by: String?,
-    downs: Int64, #always zero?
-    body: String,
-    #edited: (Float64|Bool), # This is annoying complicated, prob needs its own conv
-    #author_flair_css_class: String?,
-    collapsed: Bool,
-    is_submitter: Bool,
-    #collapsed_reason:
-    body_html: String,
-    stickied: Bool,
-    can_gild: Bool,
-    subreddit: String,
-    score_hidden: Bool,
-    subreddit_type: String,
     name: String,
+
+    # voteable
+    ups: Int64,
+    downs: Int64, #always zero
+    likes: Bool?,
+
+    # created
     #created: Float64,
-    #author_flair_text:
     created_utc: {type: Time, converter: RedditThing::TimeStampConverter},
-    subreddit_name_prefixed: String,
-    controversiality: Int64,
-    depth: Int64,
+
+    approved_by: String?,
+    author: String,
+    author_flair_css_class: String,
+    author_flair_text: String,
+    banned_by: String,
+    body: String,
+    body_html: String,
+    edited: {type: Bool | Time, converter: RedditThing::BoolOrTimeStampConverter},
+    gilded: Int64,
+    link_author: String?,
+    link_id: String,
+    link_title: String?,
+    link_url: String?,
+    num_reports: Int64?,
+    parent_id: String,
+    replies: {type: Listing, converter: RedditThing::RepliesConverter},
+    saved: Bool,
+    score: Int64,
+    score_hidden: Bool,
+    subreddit: String,
+    subreddit_id: String,
+    distinguished: String?,
+
+    #approved_at_utc: Int64?,
+    #removal_reason:
+    #user_reports:
+    #banned_at_utc:
+    #archived: Bool,
+    #report_reasons:
+    #can_mod_post: Bool,
+    #collapsed: Bool,
+    #is_submitter: Bool,
+    #collapsed_reason:
+    #stickied: Bool,
+    #can_gild: Bool,
+    #subreddit_type: String,
+    #subreddit_name_prefixed: String,
+    #controversiality: Int64,
+    #depth: Int64,
     #mod_reports:
-    #num_reports:
-    distinguished: String? #probably?
   )
 
   def replies_no_bullshit(client) : Array(Comment)
@@ -301,27 +378,6 @@ class Comment < RedditThing
     end
     return res
   end
-end
-
-class Post < RedditThing
-  JSON.mapping(
-    domain: String,
-    #approved_at_utc: {type: Time, converter: RedditThing::TimeStampConverter},
-    #distinguished:
-    #banned_by:
-    #media_embed:
-    subreddit: String,
-    selftext_html: String?,
-    selftext: String,
-    likes: Int64?,
-    #suggested_sort:
-    #user_reports
-    #secure_media
-    saved: Bool,
-    created_utc: {type: Time, converter: RedditThing::TimeStampConverter},
-    id: String
-    #TODO
-  )
 end
     
     
