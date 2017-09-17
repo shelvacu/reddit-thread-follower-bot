@@ -9,20 +9,6 @@ def die(msg)
   exit 1
 end
 
-
-#votable
-# ups: Int64,
-# downs: In64, #(always zero)
-# likes: Bool?,
-
-#created
-# created: Float64,
-# created_utc: {type: Time, converter: RedditThing::TimeStampConverter}
-
-
-
-    
-    
 class AuthData
   JSON.mapping(
     user_agent: String,
@@ -31,8 +17,6 @@ class AuthData
     username: String,
     password: String
   )
-
-  #property user_agent, client_id, secret, username, password
 end
 
 class RedditClient < HTTP::Client
@@ -54,42 +38,6 @@ class RedditClient < HTTP::Client
     raise ArgumentError.new() if path.includes? '?'
     return self.get(path+"?"+p.to_s)
   end
-end
-
-#File.open("example-body-beautiful.json", "r") do |fh|
-#  pull = JSON::PullParser.new(fh)
-#  pull.read_begin_array
-#  pull.skip
-#  res = RedditThing.from_json(pull)
-#  pull.read_end_array
-#  p res
-#end
-
-#exit
-
-def read_thing(pull : JSON::PullParser)
-  case pull.kind
-  when :begin_array
-    res = [] of RedditObject
-    pull.read_array do
-      res << RedditThing.from_json(pull)
-    end
-    return res
-  when :begin_object
-    return RedditThing.from_json(pull)
-  else
-    raise "not implemented #{pull.kind}"
-  end
-end
-
-def read_thing(resp : (String | IO))
-  pull = JSON::PullParser.new(resp)
-  read_thing(pull)
-end
-
-def read_thing(resp : HTTP::Client::Response)
-  body = resp.body? || resp.body_io
-  read_thing(body)
 end
 
 STDERR.puts "reading authdata"
@@ -155,13 +103,13 @@ resp = client.get_params(
 
 #threads = [] of String
 
-comments = [] of Comment
+comments = [] of Shreddit::Comment
 
 pull = JSON::PullParser.new(resp.body? || resp.body_io)
 pull.read_begin_array
 pull.skip
-read_thing(pull).as(Listing).each do |red_obj|
-  if red_obj.is_a? Comment
+Shreddit.read_thing(pull).as(Shreddit::Listing).each do |red_obj|
+  if red_obj.is_a? Shreddit::Comment
     comments << red_obj
   else
     raise "unexpected"
@@ -196,4 +144,4 @@ I am a bot. Contact /u/shelvac2 with any questions/comments/concerns/concerts/er
 
 puts post_text
 
-puts client.post_form("/api/editusertext", {"api_type" => "json", "raw_json" => "1", "thing_id" => "t1_dm689wn", "text" => post_text})
+puts client.post_form("/api/editusertext", {"thing_id" => "t1_dm689wn", "text" => post_text})
