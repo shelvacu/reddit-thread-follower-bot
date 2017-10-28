@@ -1,13 +1,13 @@
 module Shreddit
-  abstract class RedditThing
+  abstract class Thing
   end
 
   module ListingHack
   end
 
-  class Listing < Array(RedditThing | ListingHack)
+  class Listing < Array(Thing | ListingHack)
     include ListingHack
   end
 
-  alias RedditObject = (RedditThing | Listing)
+  alias RedditObject = (Thing | ListingHack)
 end

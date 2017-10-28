@@ -74,12 +74,12 @@ end
 
 access_token : String = auth_resp["access_token"].as(String)
 
+if false
 client = RedditClient.new("oauth.reddit.com", tls: true)
 
 client.before_request do |req|
   sleep 1 #easiest way to never exceed ratelimit restrictions
   req.headers["User-Agent"] = authdata.user_agent
-  #            Authorization
   req.headers["Authorization"] = "Bearer #{access_token}"
   #p req
 end
@@ -116,6 +116,12 @@ Shreddit.read_thing(pull).as(Shreddit::Listing).each do |red_obj|
   end
 end
 pull.read_end_array
+end
+
+client = Shreddit::AuthedClient.new(bearer_token: access_token, user_agent: authdata.user_agent)
+
+res = client.get_comments("6vy17t", params: {"comment" => last_comment_id})
+comments = res[:comments]
 
 p comments
 
@@ -144,4 +150,4 @@ I am a bot. Contact /u/shelvac2 with any questions/comments/concerns/concerts/er
 
 puts post_text
 
-puts client.post_form("/api/editusertext", {"thing_id" => "t1_dm689wn", "text" => post_text})
+#puts client.post_form("/api/editusertext", {"thing_id" => "t1_dm689wn", "text" => post_text})

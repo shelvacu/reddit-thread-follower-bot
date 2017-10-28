@@ -9,10 +9,10 @@ module Shreddit
     "t4" => Message,
     "t5" => Subreddit,
     "t6" => Award,
-    "more" => MoreReddit
+    "more" => More
   }
 
-  abstract class RedditThing
+  abstract class Thing
     def self.from_json(pull : JSON::PullParser)
       kind = ""
       res = nil

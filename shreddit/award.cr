@@ -1,5 +1,8 @@
 module Shreddit
-  class Award
+  class Award < Thing
+    JSON.mapping(
+      id: String
+    )
     #unused type prefix?
   end
 end

@@ -1,5 +1,5 @@
 module Shreddit
-  class Subreddit < RedditThing
+  class Subreddit < Thing
     JSON.mapping(
       accounts_active: Int64,
       comment_score_hide_mins: Int64,

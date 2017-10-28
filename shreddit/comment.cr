@@ -1,5 +1,5 @@
 module Shreddit
-  class Comment < RedditThing
+  class Comment < Thing
     JSON.mapping(
       id: String,
       name: String,
@@ -11,7 +11,7 @@ module Shreddit
 
       # created
       #created: Float64,
-      created_utc: {type: Time, converter: RedditThing::TimeStampConverter},
+      created_utc: {type: Time, converter: TimeStampConverter},
 
       approved_by: String?,
       author: String,
@@ -20,7 +20,7 @@ module Shreddit
       banned_by: String,
       body: String,
       body_html: String,
-      edited: {type: Bool | Time, converter: RedditThing::BoolOrTimeStampConverter},
+      edited: {type: Bool | Time, converter: BoolOrTimeStampConverter},
       gilded: Int64,
       link_author: String?,
       link_id: String,
@@ -28,7 +28,7 @@ module Shreddit
       link_url: String?,
       num_reports: Int64?,
       parent_id: String,
-      replies: {type: Listing, converter: RedditThing::RepliesConverter},
+      replies: {type: Listing, converter: RepliesConverter},
       saved: Bool,
       score: Int64,
       score_hidden: Bool,
@@ -58,20 +58,21 @@ module Shreddit
     def replies_no_bullshit(client) : Array(Comment)
       res = [] of Comment
       return res if @replies.size == 0
-      if @replies.size == 1 && (m = @replies.first).is_a? MoreReddit
-        resp = client.get_params("/comments/#{link_id.split("_").last}", comment: @id)
-        pull = JSON::PullParser.new(resp.body)
-        pull.read_begin_array
-        pull.skip
+      if @replies.size == 1 && (m = @replies.first).is_a? More
+        #resp = client.get_params("/comments/#{link_id.split("_").last}", comment: @id)
+        #pull = JSON::PullParser.new(resp.body)
+        #pull.read_begin_array
+        #pull.skip
         #RedditThing::AssertTypeConverter(Listing).from_json(pull).each do
-        pull.on_key("data") do
-          pull.on_key("children") do
-            pull.read_array do
-              res << AssertTypeConverter(Comment).from_json(pull)
-            end
-          end
-        end
-        pull.read_end_array
+        #pull.on_key("data") do
+        #  pull.on_key("children") do
+        #    pull.read_array do
+        #      res << AssertTypeConverter(Comment).from_json(pull)
+        #    end
+        #  end
+        #end
+        #pull.read_end_array
+        return client.get_comments(link_id.split("_").last, params: {"comment" => @id})[:comments]
       else
         @replies.each do |r|
           if r.is_a? Comment

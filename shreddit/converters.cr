@@ -3,7 +3,7 @@ module Shreddit
     def self.from_json(pull : JSON::PullParser)
       res = [] of RedditObject
       pull.read_array do
-        res << RedditThing.from_json(pull)
+        res << Thing.from_json(pull)
       end
       return res
     end
@@ -11,7 +11,7 @@ module Shreddit
 
   module AssertTypeConverter(T)
     def self.from_json(pull : JSON::PullParser)
-      res = RedditThing.from_json(pull)
+      res = Thing.from_json(pull)
       if res.is_a?(T)
         return res
       else
@@ -41,13 +41,13 @@ module Shreddit
   
   module BoolOrTimeStampConverter
     def self.from_json(pull)
-      case pull.type
+      case pull.kind
       when :float, :int
         return TimeStampConverter.from_json(pull)
       when :bool
         return pull.read_bool
       else
-        raise "expected float, int, or bool but type was #{pull.type}"
+        raise "expected float, int, or bool but type was #{pull.kind}"
       end
     end
   end

@@ -6,11 +6,11 @@ module Shreddit
     when :begin_array
       res = [] of RedditObject
       pull.read_array do
-        res << RedditThing.from_json(pull)
+        res << Thing.from_json(pull)
       end
       return res
     when :begin_object
-      return RedditThing.from_json(pull)
+      return Thing.from_json(pull)
     else
       raise "not implemented #{pull.kind}"
     end

@@ -1,5 +1,7 @@
+require "./thing"
+
 module Shreddit
-  class Account < RedditThing
+  class Account < Thing
     JSON.mapping(
       id: String,
 

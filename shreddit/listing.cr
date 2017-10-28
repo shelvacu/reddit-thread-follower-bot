@@ -1,11 +1,15 @@
 require "./listing-hack"
 
 module Shreddit
-  class Listing #< Array(RedditObject)
+  class Listing < Array(Thing | ListingHack)
     @after : String?
     @before : String?
     
     property after, before
+
+    def initialize()
+      super
+    end
     
     def initialize(pull : JSON::PullParser)
       super()
@@ -17,7 +21,7 @@ module Shreddit
           @before = pull.read_string_or_null
         when "children"
           pull.read_array do
-            self << RedditThing.from_json(pull)
+            self << Thing.from_json(pull)
           end
         else
           pull.skip

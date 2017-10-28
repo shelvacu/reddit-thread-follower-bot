@@ -2,10 +2,10 @@ require "./thing"
 require "./converters"
 
 module Shreddit
-  class Link < RedditThing
+  class Link < Thing
     JSON.mapping(
       ups: Int64,
-      downs: In64, #(always zero)
+      downs: Int64, #(always zero)
       likes: Bool?,
       
       created_utc: {type: Time, converter: TimeStampConverter},

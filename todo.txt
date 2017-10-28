@@ -1,0 +1,14 @@
+dn8yprv: "[deleted]"
+dn8ypyq: "4390"
+dn8yqdg: "4391"
+dn8yqrw: "4392"
+dn8yr3f: "4393"
+Invalid Int32: [deleted] (ArgumentError)
+0x5653a836c81b: to_i32 at /opt/crystal/src/string.cr 418:5
+0x5653a83735be: to_i:strict at /opt/crystal/src/string.cr 319:5
+0x5653a8334e79: __crystal_main at /home/shelvacu/reddit-thread-follower/bot.cr 413:13
+0x5653a8347ec9: main at /opt/crystal/src/main.cr 12:15
+0x7fafe27de3f1: __libc_start_main at ??
+0x5653a833399a: _start at ??
+0x0: ??? at ??
+
