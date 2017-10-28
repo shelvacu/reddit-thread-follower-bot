@@ -1,3 +1,22 @@
+######################################################################
+#
+# This file is part of reddit-thread-follower.
+#
+# reddit-thread-follower is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# reddit-thread-follower is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with reddit-thread-follower. If not, see <http://www.gnu.org/licenses/>.
+#
+######################################################################
+
 require "json"
 require "http/client"
 require "oauth"
@@ -412,7 +431,7 @@ post_text = "[Click here to skip to post ##{last_comments.first.body.to_i(strict
 This post (hopefully) updates every minute.
 
 ---
-I am a bot. Contact /u/shelvac2 with any questions/comments/concerns/concerts/erotic fantasies."
+I am a bot. Contact /u/shelvac2 with any questions/comments/concerns/concerts/erotic fantasies. [Source](https://github.com/shelvacu/reddit-thread-follower-bot)."
 
 puts post_text
 
